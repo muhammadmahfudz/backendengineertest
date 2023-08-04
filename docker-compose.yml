@@ -1,0 +1,52 @@
+version: "3.8"
+services:
+  backend-engineer:
+      image: backendengineer:v1.0.0
+      stdin_open: true
+      tty: true
+      container_name: backendengineer
+      restart: always
+      environment:
+              TZ: "Asia/Jakarta"
+      ports:
+          - 8888:8888    
+      networks:
+        vpcbr:
+          ipv4_address: '192.168.1.4'   
+      volumes:
+          - ./config:/app/config
+          - /etc/hosts:/etc/hosts
+
+  db:
+    container_name: postgres_container
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: test_db
+    ports:
+      - "5432:5432"
+    networks:
+      vpcbr:
+        ipv4_address: '192.168.1.2'
+
+  pgadmin:
+    container_name: pgadmin4_container
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "5050:80"
+    networks:
+      vpcbr:
+        ipv4_address: '192.168.1.3'
+
+networks:
+    vpcbr:
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 192.168.1.1/24

@@ -1,0 +1,13 @@
+app:
+  name: "Backend"
+  version: "v1.0.0"
+
+postgresql:
+  host: "postgres_container"
+  port: 5432
+  dbuser: "root"
+  pass: "root"
+  dbname: "test_db"
+
+http:
+  port: ":8888"
