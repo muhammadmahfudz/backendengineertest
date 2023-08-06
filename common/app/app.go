@@ -17,6 +17,14 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+func verify(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+
+		// Validation RS256
+		return next(c)
+	}
+}
+
 func Run(cfg *config.Config) {
 	var wait time.Duration
 	flag.DurationVar(&wait, "graceful-timeout", time.Second*60, "the duration for which the server gracefully wait for existing connections to finish - e.g. 1m")
@@ -30,8 +38,9 @@ func Run(cfg *config.Config) {
 	handlerUsers := users.NewUsers(repositoryUsers)
 
 	e.POST("/user/registration", handlerUsers.Registration)
-	e.PUT("/user/update", handlerUsers.Update)
-	e.GET("user/profile/:id", handlerUsers.Profile)
+	e.PUT("/user/update", verify(handlerUsers.Update))
+	e.GET("user/profile/:id", verify(handlerUsers.Profile))
+	e.POST("user/login", handlerUsers.Login)
 
 	srv := &http.Server{
 		Addr:         cfg.Http.Port,

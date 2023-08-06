@@ -19,13 +19,5 @@ func PostgreSQLConfig(cfg *config.Config) *sql.DB {
 		log.Fatal(err)
 	}
 
-	defer db.Close()
-
-	if err = db.Ping(); err != nil {
-		panic(err)
-	} else {
-		fmt.Println("DB Connected...")
-	}
-
 	return db
 }

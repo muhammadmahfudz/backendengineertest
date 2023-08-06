@@ -25,7 +25,7 @@ func (u *Users) Registration(c echo.Context) error {
 	err := json.NewDecoder(c.Request().Body).Decode(&payload)
 
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
 	v := u.Validation(payload)
@@ -37,7 +37,7 @@ func (u *Users) Registration(c echo.Context) error {
 	regErr := u.repository.Registration(payload)
 
 	if regErr != nil {
-		return c.JSON(http.StatusInternalServerError, regErr)
+		return c.JSON(http.StatusInternalServerError, regErr.Error())
 	}
 
 	return c.JSON(http.StatusOK, resp)
@@ -52,13 +52,13 @@ func (u *Users) Update(c echo.Context) error {
 	err := json.NewDecoder(c.Request().Body).Decode(&payload)
 
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
 	errRe := u.repository.Update(payload)
 
 	if errRe != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		return c.JSON(http.StatusInternalServerError, errRe.Error())
 	}
 
 	return c.JSON(http.StatusOK, resp)
@@ -67,9 +67,33 @@ func (u *Users) Update(c echo.Context) error {
 func (u *Users) Profile(c echo.Context) error {
 	id := c.Param("id")
 
-	resp := u.repository.Profile(id)
+	resp, err := u.repository.Profile(id)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
 
 	return c.JSON(http.StatusOK, resp)
+}
+
+func (u *Users) Login(c echo.Context) error {
+	var p Payload
+	var r LoginResponse
+	if err := json.NewDecoder(c.Request().Body).Decode(&p); err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	user, err := u.repository.Login(p.PhoneNumber)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	if user.Password == p.Password {
+		// Generate JWT RS256
+	}
+
+	return c.JSON(http.StatusOK, r)
 }
 
 func (u *Users) Validation(payload Payload) []map[string]string {

@@ -1,21 +1,25 @@
 version: "3.8"
 services:
   backend-engineer:
-      image: backendengineer:v1.0.0
-      stdin_open: true
-      tty: true
-      container_name: backendengineer
-      restart: always
-      environment:
-              TZ: "Asia/Jakarta"
-      ports:
-          - 8888:8888    
-      networks:
-        vpcbr:
-          ipv4_address: '192.168.1.4'   
-      volumes:
-          - ./config:/app/config
-          - /etc/hosts:/etc/hosts
+    image: backend:v1
+    stdin_open: true
+    tty: true
+    container_name: backendengineer
+    depends_on:
+        - db
+    links:
+        - db
+    restart: always
+    environment:
+            TZ: "Asia/Jakarta"
+    ports:
+        - 8888:8888    
+    networks:
+      vpcbr:
+        ipv4_address: '192.168.1.4'   
+    volumes:
+        - ./config:/app/config
+        - /etc/hosts:/etc/hosts
 
   db:
     container_name: postgres_container
@@ -25,11 +29,13 @@ services:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: root
       POSTGRES_DB: test_db
+    volumes:
+      - ./postgres-db:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     networks:
       vpcbr:
-        ipv4_address: '192.168.1.2'
+        ipv4_address: '192.168.1.5'
 
   pgadmin:
     container_name: pgadmin4_container

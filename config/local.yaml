@@ -3,7 +3,7 @@ app:
   version: "v1.0.0"
 
 postgresql:
-  host: "postgres_container"
+  host: "db"
   port: 5432
   dbuser: "root"
   pass: "root"
