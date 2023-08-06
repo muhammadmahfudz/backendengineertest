@@ -1,9 +1,12 @@
 package users
 
 import (
+	"Backend_Engineer_Interview_Assignment/common/rs256"
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"regexp"
+	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -90,7 +93,14 @@ func (u *Users) Login(c echo.Context) error {
 	}
 
 	if user.Password == p.Password {
-		// Generate JWT RS256
+		token, err := u.CreateToken(user)
+
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err.Error())
+		}
+
+		r.Message = "success"
+		r.Token = token
 	}
 
 	return c.JSON(http.StatusOK, r)
@@ -129,4 +139,24 @@ func (u *Users) Validation(payload Payload) []map[string]string {
 	}
 
 	return err
+}
+
+func (u *Users) CreateToken(content interface{}) (string, error) {
+	prvKey, err := ioutil.ReadFile("./cert/id_rsa")
+	if err != nil {
+		return "", err
+	}
+
+	pubKey, err := ioutil.ReadFile("./cert/id_rsa.pub")
+	if err != nil {
+		return "", err
+	}
+
+	jwtToken := rs256.NewJWT(prvKey, pubKey)
+
+	tok, err := jwtToken.Create(time.Hour, content)
+	if err != nil {
+		return "", err
+	}
+	return tok, nil
 }
